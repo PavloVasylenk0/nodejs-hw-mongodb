@@ -4,14 +4,23 @@ const contactSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Name is required'],
+      trim: true,
+      minlength: [2, 'Name must be at least 2 characters long'],
+      maxlength: [50, 'Name cannot exceed 50 characters'],
     },
     phoneNumber: {
       type: String,
-      required: true,
+      required: [true, 'Phone number is required'],
+      match: [/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'],
     },
     email: {
       type: String,
+      lowercase: true,
+      match: [
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        'Please enter a valid email',
+      ],
     },
     isFavourite: {
       type: Boolean,
@@ -19,8 +28,11 @@ const contactSchema = new mongoose.Schema(
     },
     contactType: {
       type: String,
-      enum: ['work', 'home', 'personal'],
-      required: true,
+      enum: {
+        values: ['work', 'home', 'personal'],
+        message: 'Contact type must be work, home, or personal',
+      },
+      required: [true, 'Contact type is required'],
       default: 'personal',
     },
   },
