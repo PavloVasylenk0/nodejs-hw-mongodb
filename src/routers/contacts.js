@@ -13,8 +13,12 @@ import {
   createContactSchema,
   updateContactSchema,
 } from '../schemas/contacts.js';
+import authenticate from '../middlewares/authenticate.js';
 
 const router = express.Router();
+
+// Застосовуємо аутентифікацію до всіх роутів
+router.use(authenticate);
 
 router.get('/', ctrlWrapper(getAllContacts));
 router.get('/:contactId', isValidId, ctrlWrapper(getContactById));

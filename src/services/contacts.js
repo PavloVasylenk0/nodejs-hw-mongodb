@@ -2,7 +2,7 @@ import { Contact } from '../models/contacts.js';
 import createError from 'http-errors';
 import mongoose from 'mongoose';
 
-export async function getAllContacts(queryParams = {}) {
+export async function getAllContacts(queryParams = {}, userId) {
   try {
     const {
       page = 1,
@@ -13,7 +13,8 @@ export async function getAllContacts(queryParams = {}) {
       isFavourite,
     } = queryParams;
 
-    const filter = {};
+    // Побудова фільтра з userId
+    const filter = { userId };
 
     if (type) {
       filter.contactType = type;
@@ -23,17 +24,21 @@ export async function getAllContacts(queryParams = {}) {
       filter.isFavourite = isFavourite === 'true';
     }
 
+    // Побудова об'єкта сортування
     const sortOptions = {};
     sortOptions[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
+    // Розрахунок пагінації
     const skip = (parseInt(page) - 1) * parseInt(perPage);
     const limit = parseInt(perPage);
 
+    // Виконання запиту
     const [contacts, totalItems] = await Promise.all([
       Contact.find(filter).sort(sortOptions).skip(skip).limit(limit),
       Contact.countDocuments(filter),
     ]);
 
+    // Розрахунок метаданих пагінації
     const totalPages = Math.ceil(totalItems / limit);
     const currentPage = parseInt(page);
 
@@ -51,13 +56,13 @@ export async function getAllContacts(queryParams = {}) {
   }
 }
 
-export async function getContactById(contactId) {
+export async function getContactById(contactId, userId) {
   try {
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createError(400, 'Invalid contact ID format');
     }
 
-    const contact = await Contact.findById(contactId);
+    const contact = await Contact.findOne({ _id: contactId, userId });
     if (!contact) {
       throw createError(404, 'Contact not found');
     }
@@ -67,9 +72,9 @@ export async function getContactById(contactId) {
   }
 }
 
-export async function createContact(contactData) {
+export async function createContact(contactData, userId) {
   try {
-    const contact = new Contact(contactData);
+    const contact = new Contact({ ...contactData, userId });
     await contact.save();
     return contact;
   } catch (error) {
@@ -77,16 +82,20 @@ export async function createContact(contactData) {
   }
 }
 
-export async function updateContact(contactId, updateData) {
+export async function updateContact(contactId, updateData, userId) {
   try {
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createError(400, 'Invalid contact ID format');
     }
 
-    const contact = await Contact.findByIdAndUpdate(contactId, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const contact = await Contact.findOneAndUpdate(
+      { _id: contactId, userId },
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
 
     if (!contact) {
       throw createError(404, 'Contact not found');
@@ -98,13 +107,13 @@ export async function updateContact(contactId, updateData) {
   }
 }
 
-export async function deleteContact(contactId) {
+export async function deleteContact(contactId, userId) {
   try {
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createError(400, 'Invalid contact ID format');
     }
 
-    const contact = await Contact.findByIdAndDelete(contactId);
+    const contact = await Contact.findOneAndDelete({ _id: contactId, userId });
 
     if (!contact) {
       throw createError(404, 'Contact not found');

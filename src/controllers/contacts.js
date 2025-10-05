@@ -1,7 +1,10 @@
 import * as contactsService from '../services/contacts.js';
 
 export const getAllContacts = async (req, res) => {
-  const contacts = await contactsService.getAllContacts(req.query);
+  const contacts = await contactsService.getAllContacts(
+    req.query,
+    req.user._id,
+  );
 
   res.status(200).json({
     status: 200,
@@ -12,7 +15,7 @@ export const getAllContacts = async (req, res) => {
 
 export const getContactById = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await contactsService.getContactById(contactId);
+  const contact = await contactsService.getContactById(contactId, req.user._id);
 
   res.status(200).json({
     status: 200,
@@ -23,7 +26,10 @@ export const getContactById = async (req, res) => {
 
 export const createContact = async (req, res) => {
   const contactData = req.body;
-  const newContact = await contactsService.createContact(contactData);
+  const newContact = await contactsService.createContact(
+    contactData,
+    req.user._id,
+  );
 
   res.status(201).json({
     status: 201,
@@ -39,6 +45,7 @@ export const updateContact = async (req, res) => {
   const updatedContact = await contactsService.updateContact(
     contactId,
     updateData,
+    req.user._id,
   );
 
   res.status(200).json({
@@ -50,7 +57,7 @@ export const updateContact = async (req, res) => {
 
 export const deleteContact = async (req, res) => {
   const { contactId } = req.params;
-  await contactsService.deleteContact(contactId);
+  await contactsService.deleteContact(contactId, req.user._id);
 
   res.status(204).send();
 };
