@@ -74,7 +74,12 @@ export async function getContactById(contactId, userId) {
 
 export async function createContact(contactData, userId) {
   try {
-    const contact = new Contact({ ...contactData, userId });
+    const contactWithUserId = {
+      ...contactData,
+      userId: userId,
+    };
+
+    const contact = new Contact(contactWithUserId);
     await contact.save();
     return contact;
   } catch (error) {

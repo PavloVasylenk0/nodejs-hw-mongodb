@@ -13,7 +13,7 @@ export const createContactSchema = Joi.object({
       'string.pattern.base': 'Please enter a valid phone number',
       'any.required': 'Phone number is required',
     }),
-  email: Joi.string().email().messages({
+  email: Joi.string().email().allow('').messages({
     'string.email': 'Please enter a valid email',
   }),
   isFavourite: Joi.boolean().default(false),
@@ -35,7 +35,7 @@ export const updateContactSchema = Joi.object({
     .messages({
       'string.pattern.base': 'Please enter a valid phone number',
     }),
-  email: Joi.string().email().messages({
+  email: Joi.string().email().allow('').messages({
     'string.email': 'Please enter a valid email',
   }),
   isFavourite: Joi.boolean(),
