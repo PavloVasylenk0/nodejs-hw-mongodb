@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters long'],
     },
+    // ДОДАЙТЕ ЦІ ПОЛЯ ДЛЯ ОДНОРАЗОВИХ ТОКЕНІВ
+    usedResetTokens: [
+      {
+        token: String,
+        usedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -42,9 +52,24 @@ userSchema.methods.isPasswordCorrect = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+// ДОДАЙТЕ ЦЕЙ МЕТОД ДЛЯ ПЕРЕВІРКИ ТОКЕНІВ
+userSchema.methods.isTokenUsed = function (token) {
+  return this.usedResetTokens.some((usedToken) => usedToken.token === token);
+};
+
+// ДОДАЙТЕ ЦЕЙ МЕТОД ДЛЯ ПОЗНАЧЕННЯ ТОКЕНА ЯК ВИКОРИСТАНОГО
+userSchema.methods.markTokenAsUsed = function (token) {
+  this.usedResetTokens.push({ token });
+  // Зберігаємо тільки останні 10 токенів для безпеки
+  if (this.usedResetTokens.length > 10) {
+    this.usedResetTokens = this.usedResetTokens.slice(-10);
+  }
+};
+
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
+  delete user.usedResetTokens;
   return user;
 };
 

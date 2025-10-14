@@ -1,7 +1,13 @@
 import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
 import createError from 'http-errors';
-import { generateTokens, isTokenExpired } from '../utils/tokens.js';
+import {
+  generateTokens,
+  isTokenExpired,
+  generateResetToken,
+  verifyResetToken,
+} from '../utils/tokens.js';
+import { sendResetPasswordEmail } from '../utils/email.js';
 
 export const register = async (userData) => {
   try {
@@ -99,4 +105,66 @@ export const logout = async (refreshToken) => {
 
 export const findSessionByAccessToken = async (accessToken) => {
   return await Session.findOne({ accessToken });
+};
+
+export const sendResetEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw createError(404, 'User not found!');
+    }
+
+    const resetToken = generateResetToken(email);
+
+    await sendResetPasswordEmail(email, resetToken);
+
+    return { message: 'Reset password email sent successfully' };
+  } catch (error) {
+
+    if (error.status === 404) {
+      throw error;
+    }
+    throw createError(500, 'Failed to send the email, please try again later.');
+  }
+};
+
+export const resetPassword = async (token, newPassword) => {
+  try {
+
+    const decoded = verifyResetToken(token);
+
+    const user = await User.findOne({ email: decoded.email });
+
+    if (!user) {
+      throw createError(404, 'User not found!');
+    }
+
+    // ПЕРЕВІРКА ЧИ ТОКЕН ВЖЕ ВИКОРИСТАНО
+    if (user.isTokenUsed(token)) {
+      throw createError(
+        401,
+        'Token has already been used. Please request a new reset link.',
+      );
+    }
+
+    user.password = newPassword;
+
+    user.markTokenAsUsed(token);
+
+    await user.save();
+
+    const deleteResult = await Session.deleteMany({ userId: user._id });
+
+    return { message: 'Password reset successfully' };
+  } catch (error) {
+
+    if (error.message === 'Token is expired or invalid') {
+      throw createError(401, 'Token is expired or invalid.');
+    }
+    if (error.status === 404 || error.status === 401) {
+      throw error;
+    }
+    throw error;
+  }
 };

@@ -1,6 +1,7 @@
 import { Contact } from '../models/contacts.js';
 import createError from 'http-errors';
 import mongoose from 'mongoose';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 export async function getAllContacts(queryParams = {}, userId) {
   try {
@@ -72,11 +73,19 @@ export async function getContactById(contactId, userId) {
   }
 }
 
-export async function createContact(contactData, userId) {
+export async function createContact(contactData, userId, file) {
   try {
+    let photoUrl = null;
+
+    if (file) {
+      const uploadResult = await uploadToCloudinary(file.buffer);
+      photoUrl = uploadResult.secure_url;
+    }
+
     const contactWithUserId = {
       ...contactData,
       userId: userId,
+      photo: photoUrl,
     };
 
     const contact = new Contact(contactWithUserId);
@@ -87,10 +96,15 @@ export async function createContact(contactData, userId) {
   }
 }
 
-export async function updateContact(contactId, updateData, userId) {
+export async function updateContact(contactId, updateData, userId, file) {
   try {
     if (!mongoose.Types.ObjectId.isValid(contactId)) {
       throw createError(400, 'Invalid contact ID format');
+    }
+
+    if (file) {
+      const uploadResult = await uploadToCloudinary(file.buffer);
+      updateData.photo = uploadResult.secure_url;
     }
 
     const contact = await Contact.findOneAndUpdate(

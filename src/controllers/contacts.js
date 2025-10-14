@@ -29,6 +29,7 @@ export const createContact = async (req, res) => {
   const newContact = await contactsService.createContact(
     contactData,
     req.user._id,
+    req.file,
   );
 
   res.status(201).json({
@@ -46,6 +47,7 @@ export const updateContact = async (req, res) => {
     contactId,
     updateData,
     req.user._id,
+    req.file,
   );
 
   res.status(200).json({
