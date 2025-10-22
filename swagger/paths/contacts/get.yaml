@@ -1,0 +1,37 @@
+tags:
+  - Contacts
+summary: Get all contacts
+operationId: getAllContacts
+description: |
+  Retrieve a paginated list of contacts with filtering, sorting, and search capabilities.
+  Users can only access their own contacts.
+security:
+  - bearerAuth: []
+parameters:
+  - $ref: '../../components/parameters/queryParams.yaml#/page'
+  - $ref: '../../components/parameters/queryParams.yaml#/perPage'
+  - $ref: '../../components/parameters/queryParams.yaml#/sortBy'
+  - $ref: '../../components/parameters/queryParams.yaml#/sortOrder'
+  - $ref: '../../components/parameters/queryParams.yaml#/type'
+  - $ref: '../../components/parameters/queryParams.yaml#/isFavourite'
+
+responses:
+  '200':
+    description: Successfully retrieved contacts
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: "Successfully found contacts!"
+            data:
+              $ref: '../../components/schemas/ContactList.yaml'
+  '401':
+    $ref: '../../components/responses/UnauthorizedError.yaml'
+  '500':
+    $ref: '../../components/responses/ServerError.yaml'

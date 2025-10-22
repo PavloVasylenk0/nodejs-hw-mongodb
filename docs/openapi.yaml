@@ -1,0 +1,89 @@
+openapi: 3.1.0
+info:
+  version: 1.0.0
+  title: Contacts Management API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  description: |
+    A comprehensive REST API for managing contacts with authentication, 
+    file uploads, and user management features.
+    
+    ## Features
+    - User registration and authentication
+    - JWT token-based security
+    - Contact management with photos
+    - Password reset functionality
+    - File upload to Cloudinary
+    
+    ## Authentication
+    This API uses Bearer token authentication. Include the access token in the Authorization header.
+tags:
+  - name: Auth
+    description: Authentication and user management endpoints
+  - name: Contacts
+    description: Contact management endpoints
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+  - url: #посилання на задеплоєний сайт
+    description: Production server
+paths:
+  # Auth endpoints
+  /auth/register:
+    $ref: '../swagger/paths/auth/register/post.yaml'
+  /auth/login:
+    $ref: '../swagger/paths/auth/login/post.yaml'
+  /auth/refresh:
+    $ref: '../swagger/paths/auth/refresh/post.yaml'
+  /auth/logout:
+    $ref: '../swagger/paths/auth/logout/post.yaml'
+  /auth/send-reset-email:
+    $ref: '../swagger/paths/auth/send-reset-email/post.yaml'
+  /auth/reset-pwd:
+    $ref: '../swagger/paths/auth/reset-pwd/post.yaml'
+  
+  # Contacts endpoints
+  /contacts:
+    get:
+      $ref: '../swagger/paths/contacts/get.yaml'
+    post:
+      $ref: '../swagger/paths/contacts/post.yaml'
+  /contacts/{id}:
+    get:
+      $ref: '../swagger/paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: '../swagger/paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: '../swagger/paths/contacts/{id}/delete.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+  schemas:
+    User:
+      $ref: '../swagger/components/schemas/User.yaml'
+    Contact:
+      $ref: '../swagger/components/schemas/Contact.yaml'
+    ContactList:
+      $ref: '../swagger/components/schemas/ContactList.yaml'
+    Error:
+      $ref: '../swagger/components/schemas/Error.yaml'
+    ValidationError:
+      $ref: '../swagger/components/schemas/ValidationError.yaml'
+  responses:
+    UnauthorizedError:
+      $ref: '../swagger/components/responses/UnauthorizedError.yaml'
+    NotFoundError:
+      $ref: '../swagger/components/responses/NotFoundError.yaml'
+    ValidationError:
+      $ref: '../swagger/components/responses/ValidationError.yaml'
+    ServerError:
+      $ref: '../swagger/components/responses/ServerError.yaml'

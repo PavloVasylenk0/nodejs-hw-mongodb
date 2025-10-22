@@ -1,0 +1,9 @@
+description: Unauthorized
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/Error.yaml'
+    example:
+      status: 401
+      message: "Please provide access token"
+      data: null

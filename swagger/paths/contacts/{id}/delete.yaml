@@ -1,0 +1,28 @@
+tags:
+  - Contacts
+summary: Delete a contact
+operationId: deleteContact
+description: Permanently delete a contact.
+security:
+  - bearerAuth: []
+parameters:
+  - $ref: '../../../components/parameters/contactId.yaml'
+responses:
+  '204':
+    description: Successfully deleted contact
+  '400':
+    description: Invalid contact ID format
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Error.yaml'
+        example:
+          status: 400
+          message: "Invalid contact ID format"
+          data: "Please provide a valid contact ID"
+  '401':
+    $ref: '../../../components/responses/UnauthorizedError.yaml'
+  '404':
+    $ref: '../../../components/responses/NotFoundError.yaml'
+  '500':
+    $ref: '../../../components/responses/ServerError.yaml'

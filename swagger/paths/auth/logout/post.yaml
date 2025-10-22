@@ -1,0 +1,27 @@
+tags:
+  - Auth
+summary: Logout user
+operationId: logoutUser
+description: Invalidate refresh token and clear cookies.
+security:
+  - cookieAuth: []
+responses:
+  '204':
+    description: Successfully logged out
+    headers:
+      Set-Cookie:
+        schema:
+          type: string
+          example: "refreshToken=; HttpOnly; Secure; SameSite=Strict; Max-Age=0"
+  '401':
+    description: No refresh token provided
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Error.yaml'
+        example:
+          status: 401
+          message: "Refresh token not found"
+          data: null
+  '500':
+    $ref: '../../../components/responses/ServerError.yaml'

@@ -1,0 +1,63 @@
+tags:
+  - Auth
+summary: Login user
+operationId: loginUser
+description: Authenticate user and receive access/refresh tokens.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          email:
+            type: string
+            format: email
+            example: "john@example.com"
+          password:
+            type: string
+            example: "password123"
+        required:
+          - email
+          - password
+responses:
+  '200':
+    description: Successfully logged in
+    headers:
+      Set-Cookie:
+        schema:
+          type: string
+          example: "refreshToken=abc123; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000"
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 200
+            message:
+              type: string
+              example: "Successfully logged in an user!"
+            data:
+              type: object
+              properties:
+                accessToken:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                user:
+                  $ref: '../../../components/schemas/User.yaml'
+  '400':
+    $ref: '../../../components/responses/ValidationError.yaml'
+  '401':
+    description: Invalid credentials
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Error.yaml'
+        example:
+          status: 401
+          message: "Email or password is wrong"
+          data: null
+  '500':
+    $ref: '../../../components/responses/ServerError.yaml'

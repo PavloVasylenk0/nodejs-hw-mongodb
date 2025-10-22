@@ -1,0 +1,59 @@
+tags:
+  - Auth
+summary: Register a new user
+operationId: registerUser
+description: Create a new user account.
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+            minLength: 2
+            maxLength: 50
+            example: "John Doe"
+          email:
+            type: string
+            format: email
+            example: "john@example.com"
+          password:
+            type: string
+            minLength: 6
+            example: "password123"
+        required:
+          - name
+          - email
+          - password
+responses:
+  '201':
+    description: Successfully registered
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: "Successfully registered a user!"
+            data:
+              $ref: '../../../components/schemas/User.yaml'
+  '400':
+    $ref: '../../../components/responses/ValidationError.yaml'
+  '409':
+    description: Email already in use
+    content:
+      application/json:
+        schema:
+          $ref: '../../../components/schemas/Error.yaml'
+        example:
+          status: 409
+          message: "Email in use"
+          data: null
+  '500':
+    $ref: '../../../components/responses/ServerError.yaml'
