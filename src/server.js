@@ -22,12 +22,39 @@ const logger = pino({
 export function setupServer() {
   const app = express();
 
-  app.use(cors());
+  const corsOptions = {
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://nodejs-hw-mongodb-9ho9.onrender.com',
+      ];
+
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    optionsSuccessStatus: 200,
+  };
+
+  app.use(cors(corsOptions));
   app.use(express.json());
   app.use(cookieParser());
 
   app.use((req, res, next) => {
-    logger.info(`${req.method} ${req.url}`);
+    logger.info(`${req.method} ${req.url}`, {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      environment: process.env.NODE_ENV,
+    });
     next();
   });
 

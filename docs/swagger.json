@@ -15,7 +15,7 @@
       "description": "Local development server"
     },
     {
-      "url": "https://your-app.onrender.com",
+      "url": "https://nodejs-hw-mongodb-9ho9.onrender.com",
       "description": "Production server"
     }
   ],
